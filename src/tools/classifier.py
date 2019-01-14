@@ -146,8 +146,6 @@ class PyTorchClassifier(object):
                 pred = output.data.max(1)[1]
                 preds.append(pred.cpu().data.numpy())
             labels = devy.cpu().data.numpy()
-            print(labels)
-            print(len(labels))
             preds = np.concatenate(preds)
             matthews = matthews_corrcoef(labels, preds)
 

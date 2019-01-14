@@ -223,8 +223,8 @@ class SplitClassifier(object):
                 clf.fit(self.X['train'], self.y['train'])
 
             if self.matthews:
-                scores.append(clf.score_matthews(self.X['valid'],
-                                                 self.y['valid']))
+                scores.append(round(100*clf.score_matthews(self.X['valid'],
+                                                           self.y['valid']), 2))
             else:
                 scores.append(round(100*clf.score(self.X['valid'],
                                                   self.y['valid']), 2))
