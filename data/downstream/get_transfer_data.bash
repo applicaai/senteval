@@ -35,7 +35,6 @@ SSTbin='https://raw.githubusercontent.com/PrincetonML/SIF/master/data'
 SSTfine='https://raw.githubusercontent.com/AcademiaSinicaNLPLab/sentiment_dataset/master/data/'
 STSBenchmark='http://ixa2.si.ehu.es/stswiki/images/4/48/Stsbenchmark.tar.gz'
 SNLI='https://nlp.stanford.edu/projects/snli/snli_1.0.zip'
-MULTINLI='https://www.nyu.edu/projects/bowman/multinli/multinli_0.9.zip'
 COCO='https://s3.amazonaws.com/senteval/coco_r101_feat'
 
 # MRPC is a special case (we use "cabextract" to extract the msi file on Linux, see below)
@@ -218,9 +217,6 @@ do
 done
 rm -r $data_path/SNLI/snli_1.0
 
-
-
-
 ### Get COCO captions and resnet-101 2048d-features
 # Captions : Copyright (c) 2015, COCO Consortium. All rights reserved.
 mkdir $data_path/COCO
@@ -228,8 +224,6 @@ for split in train valid test
 do
     curl -Lo $data_path/COCO/$split.pkl $COCO/$split.pkl
 done
-
-
 
 
 ### download MRPC

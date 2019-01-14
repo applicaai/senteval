@@ -15,7 +15,7 @@ import logging
 import numpy as np
 import io
 
-from senteval.tools.validation import KFoldClassifier
+from src.tools.validation import KFoldClassifier
 
 from sklearn.metrics import f1_score
 

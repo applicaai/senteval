@@ -31,7 +31,7 @@ assert os.path.isfile(MODEL_PATH) and os.path.isfile(PATH_TO_W2V), \
 
 # import senteval
 sys.path.insert(0, PATH_SENTEVAL)
-import senteval
+import src
 
 
 def prepare(params, samples):
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     params_senteval['infersent'] = model.cuda()
 
-    se = senteval.engine.SE(params_senteval, batcher, prepare)
+    se = src.engine.SE(params_senteval, batcher, prepare)
     transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
                       'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
                       'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',

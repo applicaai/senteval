@@ -12,16 +12,18 @@ Generic sentence evaluation scripts wrapper
 '''
 from __future__ import absolute_import, division, unicode_literals
 
-from senteval import utils
-from senteval.binary import CREval, MREval, MPQAEval, SUBJEval
-from senteval.snli import SNLIEval
-from senteval.trec import TRECEval
-from senteval.sick import SICKRelatednessEval, SICKEntailmentEval
-from senteval.mrpc import MRPCEval
-from senteval.sts import STS12Eval, STS13Eval, STS14Eval, STS15Eval, STS16Eval, STSBenchmarkEval
-from senteval.sst import SSTEval
-from senteval.rank import ImageCaptionRetrievalEval
-from senteval.probing import *
+from src import utils
+from src.binary import CREval, MREval, MPQAEval, SUBJEval
+from src.nli import SNLIEval, MNLIEval, QNLIEval, QQPEval, RTEEval, WNLIEval
+from src.cola import CoLAEval
+from src.trec import TRECEval
+from src.sick import SICKRelatednessEval, SICKEntailmentEval
+from src.mrpc import MRPCEval
+from src.sts import STS12Eval, STS13Eval, STS14Eval, STS15Eval, STS16Eval, STSBenchmarkEval
+from src.sst import SSTEval
+from src.rank import ImageCaptionRetrievalEval
+from src.probing import *
+
 
 class SE(object):
     def __init__(self, params, batcher, prepare=None):
@@ -51,7 +53,8 @@ class SE(object):
                            'STS14', 'STS15', 'STS16',
                            'Length', 'WordContent', 'Depth', 'TopConstituents',
                            'BigramShift', 'Tense', 'SubjNumber', 'ObjNumber',
-                           'OddManOut', 'CoordinationInversion']
+                           'OddManOut', 'CoordinationInversion',
+                           'CoLA', 'QQP', 'MNLI', 'QNLI', 'RTE', 'WNLI', 'AX']
 
     def eval(self, name):
         # evaluate on evaluation [name], either takes string or list of strings
@@ -87,6 +90,18 @@ class SE(object):
             self.evaluation = SICKEntailmentEval(tpath + '/downstream/SICK', seed=self.params.seed)
         elif name == 'SNLI':
             self.evaluation = SNLIEval(tpath + '/downstream/SNLI', seed=self.params.seed)
+        elif name == 'MNLI':
+            self.evaluation = MNLIEval(tpath + '/downstream/MNLI', seed=self.params.seed)
+        elif name == 'QNLI':
+            self.evaluation = QNLIEval(tpath + '/downstream/QNLI', seed=self.params.seed)
+        elif name == 'QQP':
+            self.evaluation = QQPEval(tpath + '/downstream/QQP', seed=self.params.seed)
+        elif name == 'RTE':
+            self.evaluation = RTEEval(tpath + '/downstream/RTE', seed=self.params.seed)
+        elif name == 'WNLI':
+            self.evaluation = WNLIEval(tpath + '/downstream/WNLI', seed=self.params.seed)
+        elif name == 'CoLA':
+            self.evaluation = CoLAEval(tpath + '/downstream/CoLA', seed=self.params.seed)
         elif name in ['STS12', 'STS13', 'STS14', 'STS15', 'STS16']:
             fpath = name + '-en-test'
             self.evaluation = eval(name + 'Eval')(tpath + '/downstream/STS/' + fpath, seed=self.params.seed)

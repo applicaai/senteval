@@ -20,7 +20,7 @@ PATH_TO_DATA = '../data'
 
 # import SentEval
 sys.path.insert(0, PATH_TO_SENTEVAL)
-import senteval
+import src
 
 # tensorflow session
 session = tf.Session()
@@ -56,7 +56,7 @@ params_senteval['google_use'] = encoder
 logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
 
 if __name__ == "__main__":
-    se = senteval.engine.SE(params_senteval, batcher, prepare)
+    se = src.engine.SE(params_senteval, batcher, prepare)
     transfer_tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16',
                       'MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'SST5', 'TREC', 'MRPC',
                       'SICKEntailment', 'SICKRelatedness', 'STSBenchmark',
