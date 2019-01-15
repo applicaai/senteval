@@ -22,7 +22,7 @@ from src.tools.validation import SplitClassifier
 
 class SNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.debug(f'***** Transfer task : SNLI Entailment*****\n\n')
+        logging.info(f'***** Transfer task : SNLI Entailment*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -71,6 +71,7 @@ class SNLIEval(object):
         self.X, self.y = {}, {}
         dico_label = {'entailment': 0,  'neutral': 1, 'contradiction': 2}
         for key in self.data:
+            logging.info(f"Encoding {key} set for SNLI...")
             if key not in self.X:
                 self.X[key] = []
             if key not in self.y:
@@ -88,9 +89,6 @@ class SNLIEval(object):
                     enc2 = batcher(params, batch2)
                     enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
                                                 np.abs(enc1 - enc2))))
-                if (ii*params.batch_size) % (20000*params.batch_size) == 0:
-                    logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_labels))
             self.X[key] = np.vstack(enc_input)
             self.y[key] = np.array([dico_label[y] for y in mylabels])
 
@@ -114,7 +112,7 @@ class SNLIEval(object):
 
 class MNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.debug(f'***** Transfer task : MNLI Entailment*****\n\n')
+        logging.info(f'***** Transfer task : MNLI Entailment*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -163,6 +161,7 @@ class MNLIEval(object):
         self.X, self.y = {}, {}
         dico_label = {'entailment': 0,  'neutral': 1, 'contradiction': 2}
         for key in self.data:
+            logging.info(f"Encoding {key} set for MNLI...")
             if key not in self.X:
                 self.X[key] = []
             if key not in self.y:
@@ -180,9 +179,6 @@ class MNLIEval(object):
                     enc2 = batcher(params, batch2)
                     enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
                                                 np.abs(enc1 - enc2))))
-                if (ii*params.batch_size) % (20000*params.batch_size) == 0:
-                    logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_labels))
             self.X[key] = np.vstack(enc_input)
             self.y[key] = np.array([dico_label[y] for y in mylabels])
 
@@ -206,7 +202,7 @@ class MNLIEval(object):
 
 class QNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.debug(f'***** Transfer task : QNLI Entailment*****\n\n')
+        logging.info(f'***** Transfer task : QNLI Entailment*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -249,6 +245,7 @@ class QNLIEval(object):
         self.X, self.y = {}, {}
         dico_label = {'entailment': 0,  'not_entailment': 1}
         for key in self.data:
+            logging.info(f"Encoding {key} set for QNLI...")
             if key not in self.X:
                 self.X[key] = []
             if key not in self.y:
@@ -269,9 +266,6 @@ class QNLIEval(object):
                     enc2 = batcher(params, batch2)
                     enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
                                                 np.abs(enc1 - enc2))))
-                if (ii*params.batch_size) % (20000*params.batch_size) == 0:
-                    logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
             if len(self.data[key]) == 3:
                 self.y[key] = np.array([dico_label[y] for y in mylabels])
@@ -295,7 +289,7 @@ class QNLIEval(object):
 
 class QQPEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.debug(f'***** Transfer task : QQP*****\n\n')
+        logging.info(f'***** Transfer task : QQP*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -338,6 +332,7 @@ class QQPEval(object):
         self.X, self.y = {}, {}
         dico_label = {'0': 0,  '1': 1}
         for key in self.data:
+            logging.info(f"Encoding {key} set for QQP...")
             if key not in self.X:
                 self.X[key] = []
             if key not in self.y:
@@ -358,9 +353,6 @@ class QQPEval(object):
                     enc2 = batcher(params, batch2)
                     enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
                                                 np.abs(enc1 - enc2))))
-                if (ii*params.batch_size) % (20000*params.batch_size) == 0:
-                    logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
             if len(self.data[key]) == 3:
                 self.y[key] = np.array([dico_label[y] for y in mylabels])
@@ -384,7 +376,7 @@ class QQPEval(object):
 
 class RTEEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.debug(f'***** Transfer task : RTE*****\n\n')
+        logging.info(f'***** Transfer task : RTE*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -409,7 +401,7 @@ class RTEEval(object):
                               key=lambda z: (len(z[0]), len(z[1]), z[2]))
         valid2, valid1, validlabels = map(list, zip(*sorted_valid))
 
-        self.samples = train1 + train2 + valid1 + valid2  # + test1 + test2
+        self.samples = train1 + train2 + valid1 + valid2 + test1 + test2
         self.data = {'train': (train1, train2, trainlabels),
                      'valid': (valid1, valid2, validlabels),
                      'test': (test1, test2)
@@ -427,6 +419,7 @@ class RTEEval(object):
         self.X, self.y = {}, {}
         dico_label = {'entailment': 0,  'not_entailment': 1}
         for key in self.data:
+            logging.info(f"Encoding {key} set for RTE...")
             if key not in self.X:
                 self.X[key] = []
             if key not in self.y:
@@ -447,9 +440,6 @@ class RTEEval(object):
                     enc2 = batcher(params, batch2)
                     enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
                                                 np.abs(enc1 - enc2))))
-                if (ii*params.batch_size) % (20000*params.batch_size) == 0:
-                    logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
             if len(self.data[key]) == 3:
                 self.y[key] = np.array([dico_label[y] for y in mylabels])
@@ -473,7 +463,7 @@ class RTEEval(object):
 
 class WNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.debug(f'***** Transfer task : WNLI*****\n\n')
+        logging.info(f'***** Transfer task : WNLI*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -516,6 +506,7 @@ class WNLIEval(object):
         self.X, self.y = {}, {}
         dico_label = {'0': 0,  '1': 1}
         for key in self.data:
+            logging.info(f"Encoding {key} set for WNLI...")
             if key not in self.X:
                 self.X[key] = []
             if key not in self.y:
@@ -536,9 +527,6 @@ class WNLIEval(object):
                     enc2 = batcher(params, batch2)
                     enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
                                                 np.abs(enc1 - enc2))))
-                if (ii*params.batch_size) % (20000*params.batch_size) == 0:
-                    logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
             if len(self.data[key]) == 3:
                 self.y[key] = np.array([dico_label[y] for y in mylabels])
