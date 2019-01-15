@@ -77,7 +77,7 @@ class CoLAEval(object):
 
         clf = SplitClassifier(X={'train': sst_embed['train']['X'],
                                  'valid': sst_embed['dev']['X'],
-                                 'test': sst_embed['test']},
+                                 'test': sst_embed['test']['X']},
                               y={'train': sst_embed['train']['y'],
                                  'valid': sst_embed['dev']['y']},
                               config=config_classifier,
