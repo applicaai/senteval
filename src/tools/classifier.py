@@ -153,12 +153,12 @@ class PyTorchClassifier(object):
 
     def predict(self, devX):
         self.model.eval()
-        if not isinstance(devX, torch.cuda.FloatTensor):
-            devX = torch.FloatTensor(devX).cuda()
         yhat = np.array([])
         with torch.no_grad():
             for i in range(0, len(devX), self.batch_size):
                 Xbatch = devX[i:i + self.batch_size]
+                if not isinstance(Xbatch, torch.cuda.FloatTensor):
+                    Xbatch = torch.FloatTensor(Xbatch).cuda()
                 output = self.model(Xbatch)
                 yhat = np.append(yhat,
                                  output.data.max(1)[1].cpu().numpy())
