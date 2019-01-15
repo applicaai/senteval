@@ -219,8 +219,8 @@ class QNLIEval(object):
         validlabels = io.open(os.path.join(taskpath, 'labels.dev'),
                               encoding='utf-8').read().splitlines()
 
-        # test1 = self.loadFile(os.path.join(taskpath, 's1.test'))  # TODO (chledowski): we dont have test labels
-        # test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
+        test1 = self.loadFile(os.path.join(taskpath, 's1.test'))
+        test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
 
         # sort data (by s2 first) to reduce padding
         sorted_train = sorted(zip(train2, train1, trainlabels),
@@ -231,14 +231,10 @@ class QNLIEval(object):
                               key=lambda z: (len(z[0]), len(z[1]), z[2]))
         valid2, valid1, validlabels = map(list, zip(*sorted_valid))
 
-        # sorted_test = sorted(zip(test2, test1, testlabels),
-        #                      key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        # test2, test1, testlabels = map(list, zip(*sorted_test))
-
-        self.samples = train1 + train2 + valid1 + valid2  # + test1 + test2
+        self.samples = train1 + train2 + valid1 + valid2 + test1 + test2
         self.data = {'train': (train1, train2, trainlabels),
                      'valid': (valid1, valid2, validlabels),
-                     # 'test': (test1, test2, testlabels)
+                     'test': (test1, test2)
                      }
 
     def do_prepare(self, params, prepare):
@@ -258,10 +254,13 @@ class QNLIEval(object):
             if key not in self.y:
                 self.y[key] = []
 
-            input1, input2, mylabels = self.data[key]
+            if len(self.data[key]) == 3:
+                input1, input2, mylabels = self.data[key]
+            else:
+                input1, input2 = self.data[key]
             enc_input = []
-            n_labels = len(mylabels)
-            for ii in range(0, n_labels, params.batch_size):
+            n_data = len(input1)
+            for ii in range(0, n_data, params.batch_size):
                 batch1 = input1[ii:ii + params.batch_size]
                 batch2 = input2[ii:ii + params.batch_size]
 
@@ -272,9 +271,10 @@ class QNLIEval(object):
                                                 np.abs(enc1 - enc2))))
                 if (ii*params.batch_size) % (20000*params.batch_size) == 0:
                     logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_labels))
+                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
-            self.y[key] = np.array([dico_label[y] for y in mylabels])
+            if len(self.data[key]) == 3:
+                self.y[key] = np.array([dico_label[y] for y in mylabels])
 
         config = {'nclasses': 2, 'seed': self.seed,
                   'usepytorch': params.usepytorch,
@@ -286,7 +286,7 @@ class QNLIEval(object):
         config_classifier['epoch_size'] = 1
         config['classifier'] = config_classifier
 
-        clf = SplitClassifier(self.X, self.y, config, test=False)
+        clf = SplitClassifier(self.X, self.y, config, test="QNLI")
         devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for QNLI\n')
         return {'devacc': devacc,
@@ -308,8 +308,8 @@ class QQPEval(object):
         validlabels = io.open(os.path.join(taskpath, 'labels.dev'),
                               encoding='utf-8').read().splitlines()
 
-        # test1 = self.loadFile(os.path.join(taskpath, 's1.dev'))  # TODO (chledowski): we dont have test
-        # test2 = self.loadFile(os.path.join(taskpath, 's2.dev'))
+        test1 = self.loadFile(os.path.join(taskpath, 's1.test'))
+        test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
 
         # sort data (by s2 first) to reduce padding
         sorted_train = sorted(zip(train2, train1, trainlabels),
@@ -320,14 +320,10 @@ class QQPEval(object):
                               key=lambda z: (len(z[0]), len(z[1]), z[2]))
         valid2, valid1, validlabels = map(list, zip(*sorted_valid))
 
-        # sorted_test = sorted(zip(test2, test1, testlabels),
-        #                      key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        # test2, test1, testlabels = map(list, zip(*sorted_test))
-
-        self.samples = train1 + train2 + valid1 + valid2  # + test1 + test2
+        self.samples = train1 + train2 + valid1 + valid2  + test1 + test2
         self.data = {'train': (train1, train2, trainlabels),
                      'valid': (valid1, valid2, validlabels),
-                     # 'test': (test1, test2, testlabels)
+                     'test': (test1, test2)
                      }
 
     def do_prepare(self, params, prepare):
@@ -347,10 +343,13 @@ class QQPEval(object):
             if key not in self.y:
                 self.y[key] = []
 
-            input1, input2, mylabels = self.data[key]
+            if len(self.data[key]) == 3:
+                input1, input2, mylabels = self.data[key]
+            else:
+                input1, input2 = self.data[key]
             enc_input = []
-            n_labels = len(mylabels)
-            for ii in range(0, n_labels, params.batch_size):
+            n_data = len(input1)
+            for ii in range(0, n_data, params.batch_size):
                 batch1 = input1[ii:ii + params.batch_size]
                 batch2 = input2[ii:ii + params.batch_size]
 
@@ -361,9 +360,10 @@ class QQPEval(object):
                                                 np.abs(enc1 - enc2))))
                 if (ii*params.batch_size) % (20000*params.batch_size) == 0:
                     logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_labels))
+                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
-            self.y[key] = np.array([dico_label[y] for y in mylabels])
+            if len(self.data[key]) == 3:
+                self.y[key] = np.array([dico_label[y] for y in mylabels])
 
         config = {'nclasses': 2, 'seed': self.seed,
                   'usepytorch': params.usepytorch,
@@ -375,7 +375,7 @@ class QQPEval(object):
         config_classifier['epoch_size'] = 1
         config['classifier'] = config_classifier
 
-        clf = SplitClassifier(self.X, self.y, config, test=False)
+        clf = SplitClassifier(self.X, self.y, config, test='QQP')
         devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for QQP\n')
         return {'devacc': devacc,
@@ -397,8 +397,8 @@ class RTEEval(object):
         validlabels = io.open(os.path.join(taskpath, 'labels.dev'),
                               encoding='utf-8').read().splitlines()
 
-        # test1 = self.loadFile(os.path.join(taskpath, 's1.test'))  # TODO (chledowski): we dont have test
-        # test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
+        test1 = self.loadFile(os.path.join(taskpath, 's1.test'))
+        test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
 
         # sort data (by s2 first) to reduce padding
         sorted_train = sorted(zip(train2, train1, trainlabels),
@@ -409,14 +409,10 @@ class RTEEval(object):
                               key=lambda z: (len(z[0]), len(z[1]), z[2]))
         valid2, valid1, validlabels = map(list, zip(*sorted_valid))
 
-        # sorted_test = sorted(zip(test2, test1, testlabels),
-        #                      key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        # test2, test1, testlabels = map(list, zip(*sorted_test))
-
         self.samples = train1 + train2 + valid1 + valid2  # + test1 + test2
         self.data = {'train': (train1, train2, trainlabels),
                      'valid': (valid1, valid2, validlabels),
-                     # 'test': (test1, test2, testlabels)
+                     'test': (test1, test2)
                      }
 
     def do_prepare(self, params, prepare):
@@ -436,10 +432,13 @@ class RTEEval(object):
             if key not in self.y:
                 self.y[key] = []
 
-            input1, input2, mylabels = self.data[key]
+            if len(self.data[key]) == 3:
+                input1, input2, mylabels = self.data[key]
+            else:
+                input1, input2 = self.data[key]
             enc_input = []
-            n_labels = len(mylabels)
-            for ii in range(0, n_labels, params.batch_size):
+            n_data = len(input1)
+            for ii in range(0, n_data, params.batch_size):
                 batch1 = input1[ii:ii + params.batch_size]
                 batch2 = input2[ii:ii + params.batch_size]
 
@@ -450,9 +449,10 @@ class RTEEval(object):
                                                 np.abs(enc1 - enc2))))
                 if (ii*params.batch_size) % (20000*params.batch_size) == 0:
                     logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_labels))
+                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
-            self.y[key] = np.array([dico_label[y] for y in mylabels])
+            if len(self.data[key]) == 3:
+                self.y[key] = np.array([dico_label[y] for y in mylabels])
 
         config = {'nclasses': 2, 'seed': self.seed,
                   'usepytorch': params.usepytorch,
@@ -464,7 +464,7 @@ class RTEEval(object):
         config_classifier['epoch_size'] = 1
         config['classifier'] = config_classifier
 
-        clf = SplitClassifier(self.X, self.y, config, test=False)
+        clf = SplitClassifier(self.X, self.y, config, test="RTE")
         devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for RTE\n')
         return {'devacc': devacc,
@@ -486,8 +486,8 @@ class WNLIEval(object):
         validlabels = io.open(os.path.join(taskpath, 'labels.dev'),
                               encoding='utf-8').read().splitlines()
 
-        # test1 = self.loadFile(os.path.join(taskpath, 's1.test'))  # TODO (chledowski): we dont have test
-        # test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
+        test1 = self.loadFile(os.path.join(taskpath, 's1.test'))
+        test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
 
         # sort data (by s2 first) to reduce padding
         sorted_train = sorted(zip(train2, train1, trainlabels),
@@ -498,14 +498,10 @@ class WNLIEval(object):
                               key=lambda z: (len(z[0]), len(z[1]), z[2]))
         valid2, valid1, validlabels = map(list, zip(*sorted_valid))
 
-        # sorted_test = sorted(zip(test2, test1, testlabels),
-        #                      key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        # test2, test1, testlabels = map(list, zip(*sorted_test))
-
-        self.samples = train1 + train2 + valid1 + valid2  # + test1 + test2
+        self.samples = train1 + train2 + valid1 + valid2  + test1 + test2
         self.data = {'train': (train1, train2, trainlabels),
                      'valid': (valid1, valid2, validlabels),
-                     # 'test': (test1, test2, testlabels)
+                     'test': (test1, test2)
                      }
 
     def do_prepare(self, params, prepare):
@@ -525,10 +521,13 @@ class WNLIEval(object):
             if key not in self.y:
                 self.y[key] = []
 
-            input1, input2, mylabels = self.data[key]
+            if len(self.data[key]) == 3:
+                input1, input2, mylabels = self.data[key]
+            else:
+                input1, input2 = self.data[key]
             enc_input = []
-            n_labels = len(mylabels)
-            for ii in range(0, n_labels, params.batch_size):
+            n_data = len(input1)
+            for ii in range(0, n_data, params.batch_size):
                 batch1 = input1[ii:ii + params.batch_size]
                 batch2 = input2[ii:ii + params.batch_size]
 
@@ -539,9 +538,10 @@ class WNLIEval(object):
                                                 np.abs(enc1 - enc2))))
                 if (ii*params.batch_size) % (20000*params.batch_size) == 0:
                     logging.info("PROGRESS (encoding): %.2f%%" %
-                                 (100 * ii / n_labels))
+                                 (100 * ii / n_data))
             self.X[key] = np.vstack(enc_input)
-            self.y[key] = np.array([dico_label[y] for y in mylabels])
+            if len(self.data[key]) == 3:
+                self.y[key] = np.array([dico_label[y] for y in mylabels])
 
         config = {'nclasses': 2, 'seed': self.seed,
                   'usepytorch': params.usepytorch,
@@ -553,7 +553,7 @@ class WNLIEval(object):
         config_classifier['epoch_size'] = 1
         config['classifier'] = config_classifier
 
-        clf = SplitClassifier(self.X, self.y, config, test=False)
+        clf = SplitClassifier(self.X, self.y, config, test="WNLI")
         devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for WNLI\n')
         return {'devacc': devacc,

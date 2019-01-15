@@ -85,7 +85,8 @@ class SSTEval(object):
                               y={'train': sst_embed['train']['y'],
                                  'valid': sst_embed['dev']['y'],
                                  'test': sst_embed['test']['y']},
-                              config=config_classifier)
+                              config=config_classifier,
+                              test="SST-2" if self.nclasses == 2 else True)
 
         devacc, testacc = clf.run()
         logging.debug('\nDev acc : {0} Test acc : {1} for \

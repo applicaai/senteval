@@ -111,9 +111,10 @@ class KFoldClassifier(object):
     """
     (train, test) split classifier : cross-validation on train.
     """
-    def __init__(self, train, test, config):
+    def __init__(self, train, test, config, dotest=True):
         self.train = train
         self.test = test
+        self.dotest = dotest
         self.featdim = self.train['X'].shape[1]
         self.nclasses = config['nclasses']
         self.seed = config['seed']
@@ -164,21 +165,28 @@ class KFoldClassifier(object):
         logging.info('Cross-validation : best param found is reg = {0} \
             with score {1}'.format(optreg, devaccuracy))
 
-        logging.info('Evaluating...')
-        if self.usepytorch:
-            clf = MLP(self.classifier_config, inputdim=self.featdim,
-                      nclasses=self.nclasses, l2reg=optreg,
-                      seed=self.seed)
-            clf.fit(self.train['X'], self.train['y'], validation_split=0.05)
+        if self.dotest:
+            logging.info('Evaluating...')
+            if self.usepytorch:
+                clf = MLP(self.classifier_config, inputdim=self.featdim,
+                          nclasses=self.nclasses, l2reg=optreg,
+                          seed=self.seed)
+                clf.fit(self.train['X'], self.train['y'], validation_split=0.05)
+            else:
+                clf = LogisticRegression(C=optreg, random_state=self.seed)
+                clf.fit(self.train['X'], self.train['y'])
+            yhat = clf.predict(self.test['X'])
+
+            if isinstance(self.test, str):
+                print(yhat)
+                return devaccuracy
+            else:
+                testaccuracy = clf.score(self.test['X'], self.test['y'])
+                testaccuracy = round(100*testaccuracy, 2)
+
+                return devaccuracy, testaccuracy, yhat
         else:
-            clf = LogisticRegression(C=optreg, random_state=self.seed)
-            clf.fit(self.train['X'], self.train['y'])
-        yhat = clf.predict(self.test['X'])
-
-        testaccuracy = clf.score(self.test['X'], self.test['y'])
-        testaccuracy = round(100*testaccuracy, 2)
-
-        return devaccuracy, testaccuracy, yhat
+            return devaccuracy
 
 
 class SplitClassifier(object):
@@ -196,7 +204,7 @@ class SplitClassifier(object):
         self.cudaEfficient = False if 'cudaEfficient' not in config else \
             config['cudaEfficient']
         self.modelname = get_classif_name(self.classifier_config, self.usepytorch)
-        self.noreg = False if 'noreg' not in config else config['noreg']
+        self.noreg = True if 'noreg' not in config else config['noreg']
         self.config = config
         self.matthews = matthews
         self.test = test
@@ -237,8 +245,6 @@ class SplitClassifier(object):
         if self.test:
             logging.info('Validation : best param found is reg = {0} with score \
                 {1}'.format(optreg, devaccuracy))
-            clf = LogisticRegression(C=optreg, random_state=self.seed)
-            logging.info('Evaluating...')
             if self.usepytorch:
                 clf = MLP(self.classifier_config, inputdim=self.featdim,
                           nclasses=self.nclasses, l2reg=optreg,
@@ -251,8 +257,15 @@ class SplitClassifier(object):
                 clf = LogisticRegression(C=optreg, random_state=self.seed)
                 clf.fit(self.X['train'], self.y['train'])
 
-            testaccuracy = clf.score(self.X['test'], self.y['test'])
-            testaccuracy = round(100*testaccuracy, 2)
-            return devaccuracy, testaccuracy
+            if isinstance(self.test, str):
+                outputs = clf.predict(self.X['test'])
+                print(outputs)
+                return devaccuracy
+
+            else:
+                testaccuracy = clf.score(self.X['test'], self.y['test'])
+                testaccuracy = round(100*testaccuracy, 2)
+                return devaccuracy, testaccuracy
+
         else:
             return devaccuracy

@@ -30,11 +30,15 @@ class CoLAEval(object):
         trainlabel = self.loadFile(os.path.join(task_path, 'labels.train'), label=True)
         devlabel = self.loadFile(os.path.join(task_path, 'labels.dev'), label=True)
 
+        testsentence = self.loadFile(os.path.join(task_path, 'sentences.test'))
+
         self.sst_data = {'train': {'X': trainsentence, 'y': trainlabel},
-                         'dev': {'X': devsentence, 'y': devlabel}}
+                         'dev': {'X': devsentence, 'y': devlabel},
+                         'test': {'X': testsentence}}
 
     def do_prepare(self, params, prepare):
-        samples = self.sst_data['train']['X'] + self.sst_data['dev']['X']
+        samples = self.sst_data['train']['X'] + self.sst_data['dev']['X'] \
+                  + self.sst_data['test']['X']
         return prepare(params, samples)
 
     def loadFile(self, fpath, label=False):
@@ -45,24 +49,26 @@ class CoLAEval(object):
                 return [line.split() for line in f.read().splitlines()]
 
     def run(self, params, batcher):
-        sst_embed = {'train': {}, 'dev': {}}
+        sst_embed = {'train': {}, 'dev': {}, 'test': {}}
         bsize = params.batch_size
 
         for key in self.sst_data:
             logging.info('Computing embedding for {0}'.format(key))
             # Sort to reduce padding
-            sorted_data = sorted(zip(self.sst_data[key]['X'],
-                                     self.sst_data[key]['y']),
-                                 key=lambda z: (len(z[0]), z[1]))
-            self.sst_data[key]['X'], self.sst_data[key]['y'] = map(list, zip(*sorted_data))
+            if key != 'test':
+                sorted_data = sorted(zip(self.sst_data[key]['X'],
+                                         self.sst_data[key]['y']),
+                                     key=lambda z: (len(z[0]), z[1]))
+                self.sst_data[key]['X'], self.sst_data[key]['y'] = map(list, zip(*sorted_data))
 
             sst_embed[key]['X'] = []
-            for ii in range(0, len(self.sst_data[key]['y']), bsize):
+            for ii in range(0, len(self.sst_data[key]['X']), bsize):
                 batch = self.sst_data[key]['X'][ii:ii + bsize]
                 embeddings = batcher(params, batch)
                 sst_embed[key]['X'].append(embeddings)
             sst_embed[key]['X'] = np.vstack(sst_embed[key]['X'])
-            sst_embed[key]['y'] = np.array(self.sst_data[key]['y'])
+            if key != 'test':
+                sst_embed[key]['y'] = np.array(self.sst_data[key]['y'])
             logging.info('Computed {0} embeddings'.format(key))
 
         config_classifier = {'nclasses': 2, 'seed': self.seed,
@@ -70,12 +76,13 @@ class CoLAEval(object):
                              'classifier': params.classifier}
 
         clf = SplitClassifier(X={'train': sst_embed['train']['X'],
-                                 'valid': sst_embed['dev']['X']},
+                                 'valid': sst_embed['dev']['X'],
+                                 'test': sst_embed['test']},
                               y={'train': sst_embed['train']['y'],
                                  'valid': sst_embed['dev']['y']},
                               config=config_classifier,
                               matthews=True,
-                              test=False)
+                              test="CoLA")
 
         devacc = clf.run()
         logging.debug('\nDev Matthews correlation : {0}  for \
