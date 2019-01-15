@@ -106,7 +106,7 @@ class SICKRelatednessEval(object):
                                  devscores=self.sick_data['dev']['y'],
                                  config=config)
 
-        devpr, yhat = clf.run()
+        devpr, yhat, devsr = clf.run(devsr=True)
 
         pr = pearsonr(yhat, self.sick_data['test']['y'])[0]
         sr = spearmanr(yhat, self.sick_data['test']['y'])[0]
@@ -117,7 +117,7 @@ class SICKRelatednessEval(object):
         logging.debug('Test : Pearson {0} Spearman {1} MSE {2} \
                        for SICK Relatedness\n'.format(pr, sr, se))
 
-        return {'devpearson': devpr, 'pearson': pr, 'spearman': sr, 'mse': se,
+        return {'devpearson': devpr, 'devspearman': devsr, 'pearson': pr, 'spearman': sr, 'mse': se,
                 'yhat': yhat, 'ndev': len(devA), 'ntest': len(testA)}
 
     def encode_labels(self, labels, nclass=5):

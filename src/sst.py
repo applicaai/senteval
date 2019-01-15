@@ -93,6 +93,6 @@ class SSTEval(object):
         logging.debug('\nDev acc : {0} Test acc : {1} for \
         SST {2} classification\n'.format(devacc, testacc, self.task_name))
 
-        return {'devacc': devacc, 'acc': testacc,
+        return {'dev_score': devacc, 'acc': testacc,
                 'ndev': len(sst_embed['dev']['X']),
                 'ntest': len(sst_embed['test']['X'])}

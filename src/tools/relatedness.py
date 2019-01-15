@@ -17,7 +17,7 @@ import torch
 from torch import nn
 import torch.optim as optim
 
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
 
 class RelatednessPytorch(object):
@@ -67,7 +67,7 @@ class RelatednessPytorch(object):
 
         return trainX, trainy, devX, devy, testX, testy
 
-    def run(self):
+    def run(self, devsr=False):
         self.nepoch = 0
         bestpr = -1
         early_stop_count = 0
@@ -97,6 +97,9 @@ class RelatednessPytorch(object):
         self.model = bestmodel
 
         yhat = np.dot(self.predict_proba(testX), r)
+        if devsr:
+            bestsr = spearmanr(np.dot(self.predict_proba(devX), r), self.devscores)[0]
+            return bestpr, yhat, bestsr
 
         return bestpr, yhat
 
