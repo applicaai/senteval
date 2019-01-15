@@ -14,7 +14,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from src import utils
 from src.binary import CREval, MREval, MPQAEval, SUBJEval
-from src.nli import SNLIEval, MNLIEval, QNLIEval, QQPEval, RTEEval, WNLIEval
+from src.nli import SNLIEval, MNLIMEval, MNLIMMEval, QNLIEval, QQPEval, RTEEval, WNLIEval
 from src.cola import CoLAEval
 from src.trec import TRECEval
 from src.sick import SICKRelatednessEval, SICKEntailmentEval
@@ -90,8 +90,10 @@ class SE(object):
             self.evaluation = SICKEntailmentEval(tpath + '/downstream/SICK', seed=self.params.seed)
         elif name == 'SNLI':
             self.evaluation = SNLIEval(tpath + '/downstream/SNLI', seed=self.params.seed)
-        elif name == 'MNLI':
-            self.evaluation = MNLIEval(tpath + '/downstream/MNLI', seed=self.params.seed)
+        elif name == 'MNLI-m':
+            self.evaluation = MNLIMEval(tpath + '/downstream/MNLI-m', seed=self.params.seed)
+        elif name == 'MNLI-mm':
+            self.evaluation = MNLIMMEval(tpath + '/downstream/MNLI-mm', seed=self.params.seed)
         elif name == 'QNLI':
             self.evaluation = QNLIEval(tpath + '/downstream/QNLI', seed=self.params.seed)
         elif name == 'QQP':

@@ -27,33 +27,43 @@ done
 rm -r $data_path/QNLI/*.tsv
 
 
-### process MNLI
+### process MNLI-m, MNLI-mm
+mkdir $data_path/MNLI-m
+mkdir $data_path/MNLI-mm
+
 fpath=$data_path/MNLI/train.txt
 awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/train.tsv | cut -f 9,10,12 | sed '1d' > $fpath
-cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI/s1.train
-cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI/s2.train
-cut -f3 $fpath > $data_path/MNLI/labels.train
-rm $fpath
-for split in dev_matched dev_mismatched
+cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI-m/s1.train
+cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI-m/s2.train
+cut -f3 $fpath > $data_path/MNLI-m/labels.train
+for set in s1 s2 labels
 do
-    fpath=$data_path/MNLI/$split.txt
-    awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/$split.tsv | cut -f 9,10,16 | sed '1d' > $fpath
-    cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI/s1.$split
-    cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI/s2.$split
-    cut -f3 $fpath > $data_path/MNLI/labels.$split
-    rm $fpath
+    cp $data_path/MNLI-m/$set.train $data_path/MNLI-mm/
 done
-for split in test_matched test_mismatched
-do
-    fpath=$data_path/MNLI/$split.txt
-    awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/$split.tsv | cut -f 9,10 | sed '1d' > $fpath
-    cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI/s1.$split
-    cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI/s2.$split
-    rm $fpath
-done
-rm -r $data_path/MNLI/*.tsv
-rm -r $data_path/MNLI/original
-rm -r $data_path/MNLI/README.txt
+
+fpath=$data_path/MNLI/dev_matched.txt
+awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/dev_matched.tsv | cut -f 9,10,16 | sed '1d' > $fpath
+cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI-m/s1.dev
+cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI-m/s2.dev
+cut -f3 $fpath > $data_path/MNLI-m/labels.dev
+
+fpath=$data_path/MNLI/dev_mismatched.txt
+awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/dev_mismatched.tsv | cut -f 9,10,16 | sed '1d' > $fpath
+cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI-mm/s1.dev
+cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI-mm/s2.dev
+cut -f3 $fpath > $data_path/MNLI-mm/labels.dev
+
+fpath=$data_path/MNLI/test_matched.txt
+awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/test_matched.tsv | cut -f 9,10| sed '1d' > $fpath
+cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI-m/s1.test
+cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI-m/s2.test
+
+fpath=$data_path/MNLI/test_mismatched.txt
+awk '{ if ( $15 != "-" ) { print $0; } }' $data_path/MNLI/test_mismatched.tsv | cut -f 9,10 | sed '1d' > $fpath
+cut -f1 $fpath | $PTBTOKENIZER > $data_path/MNLI-mm/s1.test
+cut -f2 $fpath | $PTBTOKENIZER > $data_path/MNLI-mm/s2.test
+
+rm -r $data_path/MNLI/
 
 
 ### process QQP

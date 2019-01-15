@@ -71,6 +71,8 @@ class NLIEval(object):
             dico_label = {'entailment': 0,  'not_entailment': 1}
         elif self.name in {"QQP", "WNLI"}:
             dico_label = {'0': 0,  '1': 1}
+        elif self.name in {"SNLI", "MNLI-m", "MNLI-mm"}:
+            dico_label = {'entailment': 0,  'neutral': 1, 'contradiction': 2}
 
         for key in self.data:
             logging.info(f"Encoding {key} set for {self.name}...")
@@ -98,7 +100,7 @@ class NLIEval(object):
             if len(self.data[key]) == 3:
                 self.y[key] = np.array([dico_label[y] for y in mylabels])
 
-        if self.name in {"SNLI", "MNLI_MA", "MNLI_MI"}:
+        if self.name in {"SNLI", "MNLI-m", "MNLI-mm"}:
             nclasses = 3
         else:
             nclasses = 2
@@ -138,6 +140,16 @@ class RTEEval(NLIEval):
 class WNLIEval(NLIEval):
     def __init__(self, taskpath, seed=1111):
         super().__init__(taskpath, name='WNLI', seed=seed)
+
+
+class MNLIMEval(NLIEval):
+    def __init__(self, taskpath, seed=1111):
+        super().__init__(taskpath, name='MNLI-m', seed=seed)
+
+
+class MNLIMMEval(NLIEval):
+    def __init__(self, taskpath, seed=1111):
+        super().__init__(taskpath, name='MNLI-mm', seed=seed)
 
 
 class SNLIEval(object):
@@ -219,160 +231,3 @@ class SNLIEval(object):
         return {'dev_score': devacc, 'test_score': testacc,
                 'ndev': len(self.data['valid'][0]),
                 'ntest': len(self.data['test'][0])}
-
-
-class MNLIEval(object):
-    def __init__(self, taskpath, seed=1111):
-        self.seed = seed
-        train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
-        train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
-
-        trainlabels = io.open(os.path.join(taskpath, 'labels.train'),
-                              encoding='utf-8').read().splitlines()
-
-        valid1 = self.loadFile(os.path.join(taskpath, 's1.dev_mismatched'))
-        valid2 = self.loadFile(os.path.join(taskpath, 's2.dev_mismatched'))
-        validlabels = io.open(os.path.join(taskpath, 'labels.dev_mismatched'),
-                              encoding='utf-8').read().splitlines()
-
-        test1 = self.loadFile(os.path.join(taskpath, 's1.test_mismatched'))
-        test2 = self.loadFile(os.path.join(taskpath, 's2.test_mismatched'))
-
-        # sort data (by s2 first) to reduce padding
-        sorted_train = sorted(zip(train2, train1, trainlabels),
-                              key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        train2, train1, trainlabels = map(list, zip(*sorted_train))
-
-        sorted_valid = sorted(zip(valid2, valid1, validlabels),
-                              key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        valid2, valid1, validlabels = map(list, zip(*sorted_valid))
-
-        self.samples = train1 + train2 + valid1 + valid2 + test1 + test2
-        self.data = {'train': (train1, train2, trainlabels),
-                     'valid': (valid1, valid2, validlabels),
-                     'test': (test1, test2)
-                     }
-
-    def run(self, params, batcher):
-        self.X, self.y = {}, {}
-        dico_label = {'entailment': 0,  'neutral': 1, 'contradiction': 2}
-        for key in self.data:
-            logging.info(f"Encoding {key} set for MNLI...")
-            if key not in self.X:
-                self.X[key] = []
-            if key not in self.y:
-                self.y[key] = []
-
-            input1, input2, mylabels = self.data[key]
-            enc_input = []
-            n_labels = len(mylabels)
-            for ii in range(0, n_labels, params.batch_size):
-                batch1 = input1[ii:ii + params.batch_size]
-                batch2 = input2[ii:ii + params.batch_size]
-
-                if len(batch1) == len(batch2) and len(batch1) > 0:
-                    enc1 = batcher(params, batch1)
-                    enc2 = batcher(params, batch2)
-                    enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
-                                                np.abs(enc1 - enc2))))
-            self.X[key] = np.vstack(enc_input)
-            self.y[key] = np.array([dico_label[y] for y in mylabels])
-
-        config = {'nclasses': 3, 'seed': self.seed,
-                  'usepytorch': params.usepytorch,
-                  'cudaEfficient': True,
-                  'nhid': params.nhid, 'noreg': True}
-
-        config_classifier = copy.deepcopy(params.classifier)
-        config_classifier['max_epoch'] = 15
-        config_classifier['epoch_size'] = 1
-        config['classifier'] = config_classifier
-
-        clf = SplitClassifier(self.X, self.y, config)
-        devacc, testacc = clf.run()
-        logging.debug(f'Dev acc : {devacc} Test acc : {testacc} for MNLI\n')
-        return {'dev_matched_acc': devacc, 'dev_mismatched_acc': testacc,
-                'ndev_matched': len(self.data['valid'][0]),
-                'ndev_mismatched': len(self.data['test'][0])}
-
-
-class MNLIMatchedEval(object):
-    def __init__(self, taskpath, seed=1111):
-        self.seed = seed
-        train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
-        train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
-
-        trainlabels = io.open(os.path.join(taskpath, 'labels.train'),
-                              encoding='utf-8').read().splitlines()
-
-        valid1 = self.loadFile(os.path.join(taskpath, 's1.dev_matched'))
-        valid2 = self.loadFile(os.path.join(taskpath, 's2.dev_matched'))
-        validlabels = io.open(os.path.join(taskpath, 'labels.dev_matched'),
-                              encoding='utf-8').read().splitlines()
-
-        test1 = self.loadFile(os.path.join(taskpath, 's1.dev_mismatched'))  # TODO (chledowski) no test set
-        test2 = self.loadFile(os.path.join(taskpath, 's2.dev_mismatched'))
-        testlabels = io.open(os.path.join(taskpath, 'labels.dev_mismatched'),
-                             encoding='utf-8').read().splitlines()
-
-        # sort data (by s2 first) to reduce padding
-        sorted_train = sorted(zip(train2, train1, trainlabels),
-                              key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        train2, train1, trainlabels = map(list, zip(*sorted_train))
-
-        sorted_valid = sorted(zip(valid2, valid1, validlabels),
-                              key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        valid2, valid1, validlabels = map(list, zip(*sorted_valid))
-
-        sorted_test = sorted(zip(test2, test1, testlabels),
-                             key=lambda z: (len(z[0]), len(z[1]), z[2]))
-        test2, test1, testlabels = map(list, zip(*sorted_test))
-
-        self.samples = train1 + train2 + valid1 + valid2 + test1 + test2
-        self.data = {'train': (train1, train2, trainlabels),
-                     'valid': (valid1, valid2, validlabels),
-                     'test': (test1, test2, testlabels)
-                     }
-
-    def run(self, params, batcher):
-        self.X, self.y = {}, {}
-        dico_label = {'entailment': 0,  'neutral': 1, 'contradiction': 2}
-        for key in self.data:
-            logging.info(f"Encoding {key} set for MNLI...")
-            if key not in self.X:
-                self.X[key] = []
-            if key not in self.y:
-                self.y[key] = []
-
-            input1, input2, mylabels = self.data[key]
-            enc_input = []
-            n_labels = len(mylabels)
-            for ii in range(0, n_labels, params.batch_size):
-                batch1 = input1[ii:ii + params.batch_size]
-                batch2 = input2[ii:ii + params.batch_size]
-
-                if len(batch1) == len(batch2) and len(batch1) > 0:
-                    enc1 = batcher(params, batch1)
-                    enc2 = batcher(params, batch2)
-                    enc_input.append(np.hstack((enc1, enc2, enc1 * enc2,
-                                                np.abs(enc1 - enc2))))
-            self.X[key] = np.vstack(enc_input)
-            self.y[key] = np.array([dico_label[y] for y in mylabels])
-
-        config = {'nclasses': 3, 'seed': self.seed,
-                  'usepytorch': params.usepytorch,
-                  'cudaEfficient': True,
-                  'nhid': params.nhid, 'noreg': True}
-
-        config_classifier = copy.deepcopy(params.classifier)
-        config_classifier['max_epoch'] = 15
-        config_classifier['epoch_size'] = 1
-        config['classifier'] = config_classifier
-
-        clf = SplitClassifier(self.X, self.y, config)
-        devacc, testacc = clf.run()
-        logging.debug(f'Dev acc : {devacc} Test acc : {testacc} for MNLI\n')
-        return {'dev_matched_acc': devacc, 'dev_mismatched_acc': testacc,
-                'ndev_matched': len(self.data['valid'][0]),
-                'ndev_mismatched': len(self.data['test'][0])}
-
