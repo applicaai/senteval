@@ -151,7 +151,6 @@ class PyTorchClassifier(object):
 
         return matthews
 
-
     def predict(self, devX):
         self.model.eval()
         if not isinstance(devX, torch.cuda.FloatTensor):

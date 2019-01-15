@@ -287,7 +287,7 @@ class QNLIEval(object):
         config['classifier'] = config_classifier
 
         clf = SplitClassifier(self.X, self.y, config, test=False)
-        devacc, testacc = clf.run()
+        devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for QNLI\n')
         return {'devacc': devacc,
                 'ndev': len(self.data['valid'][0])}
@@ -376,7 +376,7 @@ class QQPEval(object):
         config['classifier'] = config_classifier
 
         clf = SplitClassifier(self.X, self.y, config, test=False)
-        devacc, testacc = clf.run()
+        devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for QQP\n')
         return {'devacc': devacc,
                 'ndev': len(self.data['valid'][0])}
@@ -465,7 +465,7 @@ class RTEEval(object):
         config['classifier'] = config_classifier
 
         clf = SplitClassifier(self.X, self.y, config, test=False)
-        devacc, testacc = clf.run()
+        devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for RTE\n')
         return {'devacc': devacc,
                 'ndev': len(self.data['valid'][0])}
@@ -554,7 +554,7 @@ class WNLIEval(object):
         config['classifier'] = config_classifier
 
         clf = SplitClassifier(self.X, self.y, config, test=False)
-        devacc, testacc = clf.run()
+        devacc = clf.run()
         logging.debug(f'Dev acc : {devacc} for WNLI\n')
         return {'devacc': devacc,
                 'ndev': len(self.data['valid'][0])}
