@@ -175,16 +175,16 @@ class KFoldClassifier(object):
             else:
                 clf = LogisticRegression(C=optreg, random_state=self.seed)
                 clf.fit(self.train['X'], self.train['y'])
-            yhat = clf.predict(self.test['X'])
+                outputs = clf.predict(self.test['X'])
 
             if isinstance(self.test, str):
-                print(yhat)
+                print("For tsv: ", len(outputs), outputs[:3])
                 return devaccuracy
             else:
                 testaccuracy = clf.score(self.test['X'], self.test['y'])
                 testaccuracy = round(100*testaccuracy, 2)
 
-                return devaccuracy, testaccuracy, yhat
+                return devaccuracy, testaccuracy, outputs
         else:
             return devaccuracy
 
@@ -259,7 +259,7 @@ class SplitClassifier(object):
 
             if isinstance(self.test, str):
                 outputs = clf.predict(self.X['test'])
-                print(outputs)
+                print("For tsv: ", len(outputs), outputs[:3])
                 return devaccuracy
 
             else:
