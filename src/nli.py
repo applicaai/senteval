@@ -155,19 +155,19 @@ class MNLIMMEval(NLIEval):
 class SNLIEval(object):
     def __init__(self, taskpath, seed=1111):
         self.seed = seed
-        train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
-        train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
+        train1 = self.load_file(os.path.join(taskpath, 's1.train'))
+        train2 = self.load_file(os.path.join(taskpath, 's2.train'))
 
         trainlabels = io.open(os.path.join(taskpath, 'labels.train'),
                               encoding='utf-8').read().splitlines()
 
-        valid1 = self.loadFile(os.path.join(taskpath, 's1.dev'))
-        valid2 = self.loadFile(os.path.join(taskpath, 's2.dev'))
+        valid1 = self.load_file(os.path.join(taskpath, 's1.dev'))
+        valid2 = self.load_file(os.path.join(taskpath, 's2.dev'))
         validlabels = io.open(os.path.join(taskpath, 'labels.dev'),
                               encoding='utf-8').read().splitlines()
 
-        test1 = self.loadFile(os.path.join(taskpath, 's1.test'))
-        test2 = self.loadFile(os.path.join(taskpath, 's2.test'))
+        test1 = self.load_file(os.path.join(taskpath, 's1.test'))
+        test2 = self.load_file(os.path.join(taskpath, 's2.test'))
         testlabels = io.open(os.path.join(taskpath, 'labels.test'),
                              encoding='utf-8').read().splitlines()
 
@@ -189,6 +189,15 @@ class SNLIEval(object):
                      'valid': (valid1, valid2, validlabels),
                      'test': (test1, test2, testlabels)
                      }
+
+    def do_prepare(self, params, prepare):
+        return prepare(params, self.samples)
+
+    @staticmethod
+    def load_file(fpath):
+        with codecs.open(fpath, 'rb', 'latin-1') as f:
+            return [line.split() for line in
+                    f.read().splitlines()]
 
     def run(self, params, batcher):
         self.X, self.y = {}, {}
