@@ -88,5 +88,5 @@ class CoLAEval(object):
         logging.debug('\nDev Matthews correlation : {0}  for \
             CoLA classification\n'.format(devacc))
 
-        return {'devacc': devacc,
+        return {'dev_score': devacc,
                 'ndev': len(sst_embed['dev']['X'])}
