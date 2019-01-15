@@ -93,8 +93,8 @@ class MRPCEval(object):
                   'usepytorch': params.usepytorch,
                   'classifier': params.classifier,
                   'nhid': params.nhid, 'kfold': params.kfold}
-        clf = KFoldClassifier(train={'X': trainF, 'y': trainY},
-                              test={'X': testF, 'y': testY}, config=config, dotest="MRPC")
+        clf= KFoldClassifier(train={'X': trainF, 'y': trainY},
+                              test={'X': testF, 'y': testY}, config=config, dotest="MRPC", both=True)
 
         devacc, testacc, yhat = clf.run()
         testf1 = round(100*f1_score(testY, yhat), 2)

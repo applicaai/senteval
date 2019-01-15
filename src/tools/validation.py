@@ -111,9 +111,10 @@ class KFoldClassifier(object):
     """
     (train, test) split classifier : cross-validation on train.
     """
-    def __init__(self, train, test, config, dotest=True):
+    def __init__(self, train, test, config, dotest=True, both=False):
         self.train = train
         self.test = test
+        self.both = both
         self.dotest = dotest
         self.featdim = self.train['X'].shape[1]
         self.nclasses = config['nclasses']
@@ -177,8 +178,12 @@ class KFoldClassifier(object):
                 clf.fit(self.train['X'], self.train['y'])
                 outputs = clf.predict(self.test['X'])
 
-            if isinstance(self.test, str):
+            if isinstance(self.dotest, str):
                 print("For tsv: ", len(outputs), outputs[:3])
+                if self.both:
+                    testaccuracy = clf.score(self.test['X'], self.test['y'])
+                    testaccuracy = round(100 * testaccuracy, 2)
+                    return devaccuracy, testaccuracy, outputs
                 return devaccuracy
             else:
                 testaccuracy = clf.score(self.test['X'], self.test['y'])
@@ -193,7 +198,7 @@ class SplitClassifier(object):
     """
     (train, valid, test) split classifier.
     """
-    def __init__(self, X, y, config, matthews=False, test=True):
+    def __init__(self, X, y, config, matthews=False, test=True, both=True):
         self.X = X
         self.y = y
         self.nclasses = config['nclasses']
@@ -208,6 +213,7 @@ class SplitClassifier(object):
         self.config = config
         self.matthews = matthews
         self.test = test
+        self.both = both
 
     def run(self):
         logging.info('Training {0} with standard validation..'
@@ -260,6 +266,10 @@ class SplitClassifier(object):
             if isinstance(self.test, str):
                 outputs = clf.predict(self.X['test'])
                 print("For tsv: ", len(outputs), outputs[:3])
+                if self.both:
+                    testaccuracy = clf.score(self.X['test'], self.y['test'])
+                    testaccuracy = round(100 * testaccuracy, 2)
+                    return devaccuracy, testaccuracy
                 return devaccuracy
 
             else:

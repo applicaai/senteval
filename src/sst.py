@@ -86,11 +86,12 @@ class SSTEval(object):
                                  'valid': sst_embed['dev']['y'],
                                  'test': sst_embed['test']['y']},
                               config=config_classifier,
-                              test="SST-2" if self.nclasses == 2 else True)
+                              test="SST-2" if self.nclasses == 2 else True,
+                              both=True)
 
         devacc, testacc = clf.run()
         logging.debug('\nDev acc : {0} Test acc : {1} for \
-            SST {2} classification\n'.format(devacc, testacc, self.task_name))
+        SST {2} classification\n'.format(devacc, testacc, self.task_name))
 
         return {'devacc': devacc, 'acc': testacc,
                 'ndev': len(sst_embed['dev']['X']),
