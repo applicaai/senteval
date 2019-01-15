@@ -198,7 +198,7 @@ class SplitClassifier(object):
     """
     (train, valid, test) split classifier.
     """
-    def __init__(self, X, y, config, matthews=False, test=True, both=True):
+    def __init__(self, X, y, config, matthews=False, test=True, both=False):
         self.X = X
         self.y = y
         self.nclasses = config['nclasses']
