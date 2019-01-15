@@ -22,7 +22,6 @@ from src.tools.validation import SplitClassifier
 
 class SNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.info(f'***** Transfer task : SNLI Entailment*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -112,7 +111,6 @@ class SNLIEval(object):
 
 class MNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.info(f'***** Transfer task : MNLI Entailment*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -202,7 +200,6 @@ class MNLIEval(object):
 
 class QNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.info(f'***** Transfer task : QNLI Entailment*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -289,7 +286,6 @@ class QNLIEval(object):
 
 class QQPEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.info(f'***** Transfer task : QQP*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -376,7 +372,6 @@ class QQPEval(object):
 
 class RTEEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.info(f'***** Transfer task : RTE*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))
@@ -463,7 +458,6 @@ class RTEEval(object):
 
 class WNLIEval(object):
     def __init__(self, taskpath, seed=1111):
-        logging.info(f'***** Transfer task : WNLI*****\n\n')
         self.seed = seed
         train1 = self.loadFile(os.path.join(taskpath, 's1.train'))
         train2 = self.loadFile(os.path.join(taskpath, 's2.train'))

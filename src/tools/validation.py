@@ -202,7 +202,7 @@ class SplitClassifier(object):
         self.X = X
         self.y = y
         self.nclasses = config['nclasses']
-        self.featdim = self.X['train'].shape[1]
+        self.featdim = self.X[1]
         self.seed = config['seed']
         self.usepytorch = config['usepytorch']
         self.classifier_config = config['classifier']
